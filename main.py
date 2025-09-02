@@ -2,23 +2,24 @@ import socket
 import threading
 
 ip = "10.34.77.0"
-port = 12345
+listen_port = 12345
+send_port = 54321
+send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 running = True
 
 
 def main():
-    server.bind(("0.0.0.0", port))
     threading.Thread(target=wait_server).start()
     a = input("Target IP: ")
-    server.connect((a, port))
-    server.send(bytes("Hello from the client!", "utf-8"))
-    print(str(server.recv(1024), "utf-8"))
+    send_socket.connect((a, listen_port))
+    send_socket.send(bytes("Hello from the client!", "utf-8"))
 
 
 
     
 def wait_server():
+    server.bind(("0.0.0.0", listen_port))
     while running:
         server.listen(5)
         conn, addr = server.accept()
@@ -36,7 +37,9 @@ if __name__ == "__main__":
         print("Server is shutting down.")
         running = False
         server.close()
+        send_socket.close()
     except Exception as e:
         print(f"An error occurred: {e}")
         running = False
         server.close()
+        send_socket.close()
